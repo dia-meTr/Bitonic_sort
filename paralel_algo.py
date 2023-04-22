@@ -1,152 +1,76 @@
 from datetime import datetime
-import numpy as np
-from sorting_techniques import pysort
-from multiprocessing import Pool, Manager, Array, cpu_count
-from copy import copy
-
-# Creating the Sort Object
-sortObj = pysort.Sorting()
+from multiprocessing import Pool, cpu_count
+import itertools
+from bitonic_sort import bitonic_merge, bitonic_sort
+from math import log2
 
 
-def compAndSwap(a, i, j, dire):
-    ai = a[i]
-    aj = a[j]
-
-    if (dire == 1 and ai > aj) or (dire == 0 and ai < aj):
-        a[i], a[j] = a[j], a[i]
-
-
-def bitonicMerge(a, low, cnt, dire, limit):
-    if cnt > limit:
-        k = cnt // 2
-        for i in range(low, low + k):
-            compAndSwap(a, i, i + k, dire)
-        bitonicMerge(a, low, k, dire, limit)
-        bitonicMerge(a, low + k, k, dire, limit)
-
-
-def bitonicSort(l, low, cnt, dire, limit):
-    if cnt > limit:
-        print(cnt)
-        k = cnt // 2
-        bitonicSort(a, low, k, 1, limit)
-        bitonicSort(a, low + k, k, 0, limit)
-        bitonicMerge(a, low, cnt, dire, limit)
-        return l
-
-
-def sort1(a, up):
+def time_counter(array, is_up):
+    print()
     n = len(a)
-    numThreads = cpu_count() * 2
-    print(numThreads)
-    m = n / numThreads
 
     time1 = datetime.now()
 
-    args = []
-    i = 2
-    j = 0
-
-    while i <= m:
-        while j < n:
-            if (j / i) % 2 == 0:
-                args.append((a, j, i, up))
-                print(f"(a, {j}, {i}, {up})")
-            else:
-                args.append((a, j, i, not up))
-                print(f"(a, {j}, {i}, {not up})")
-            j = j + i
-
-        i = i * 2
-
-    print(a)
-    print(args)
-
-    with Pool(numThreads) as p:
-        p.starmap(bitonicSort, args)
-        p.close
-        p.join
+    array = sort(array, is_up)
 
     time2 = datetime.now()
-    print("\nCurrent Time =", time2 - time1)
-    print(a)
+
+    print(sorted(array) == array)
+    print("Current Time =", time2 - time1)
+
     if results.get(n) is None:
         results[n] = [(time2 - time1).total_seconds()]
     else:
         results[n].append((time2 - time1).total_seconds())
 
 
-def time_counter(up):
-    n = len(a)
-    time1 = datetime.now()
-    sort(up)
-
-    time2 = datetime.now()
-    print("\nCurrent Time =", time2 - time1)
-    print(a)
-    if results.get(n) is None:
-        results[n] = [(time2 - time1).total_seconds()]
-    else:
-        results[n].append((time2 - time1).total_seconds())
-
-
-def custom_callback(result_iterable):
-    # iterate results
-    for result in result_iterable:
-        print(f'Got result: {result}')
-
-
-def sort(up):
-    n = len(a)
-    numThreads = cpu_count() * 2
-    m = n // numThreads
-    print(numThreads)
-    print(m)
-
+def get_args(array, n, m, is_up):
     args = []
     i = 0
-    j = 0
-    m_old = 1
+
+    while i < n:
+        if (i / m) % 2 == 0:
+            args.append((is_up, array[i:i + m]))
+        else:
+            args.append((not is_up, array[i:i + m]))
+        i = i + m
+
+    return args
+
+
+def sort(array, is_up):
+    n = len(array)
+    processes = 2 ** round(log2(cpu_count() * 5))
+    m = n // processes
+
+    pool = Pool(processes=processes)
+    args = get_args(array, n, m, is_up)
+    outputs = pool.starmap(bitonic_sort, args)
+
+    array = list(itertools.chain(*outputs))
 
     while m <= n:
-        args.append([])
-        while i < n:
-            if (i / m) % 2 == 0:
-                args[j].append((copy(a[i:i + m]), 0, m, up, m_old))
-                print(f"(a[{i}:{i + m}], {0}, {m}, {up}, {m_old})")
-            else:
-                args[j].append((copy(a[i:i + m]), 0, m, not up, m_old))
-                print(f"(a[{i}:{i + m}], {0}, {m}, {not up}, {m_old})")
-            i = i + m
-        j += 1
-        # m_old = 1
         m = m * 2
-        i = 0
+        args = get_args(array, n, m, is_up)
+        outputs = pool.starmap(bitonic_merge, args)
+        array = list(itertools.chain(*outputs))
 
-    with Pool(numThreads) as p:
-        print("--")
-        #for i in range(0, 1):
-        _ = p.starmap_async(bitonicSort, args[i], callback=custom_callback)
+    return array
 
-        p.close
-
-        p.join
-
-        print(i)
-
-
-up = 1
-results = {}
 
 if __name__ == "__main__":
+    up = 1
+    results = {}
+    lists = []
+
     with open('data.txt') as f:
-        for i in range(0, 1):
+        for i in range(0, 9):
             line = f.readline()
             a = line[1:-2].split(', ')
             a = list(map(int, a))
-            # a = Array("i", list(map(int, a)))
-            # print(a)
+            lists.append(a)
 
-        with Manager() as m:
-            l = m.list(a)
-            time_counter(up)
+        for a in lists:
+            time_counter(a, up)
+
+
