@@ -70,7 +70,9 @@ if __name__ == "__main__":
             a = list(map(int, a))
             lists.append(a)
 
-        for a in lists:
-            time_counter(a, up)
+    for a in lists:
+        time_counter(a, up)
 
+    for key, value in results.items():
+        print(f'{key}  -  {round(sum(value) / 3, 4)}  -  {value}')
 

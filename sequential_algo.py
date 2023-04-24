@@ -34,3 +34,7 @@ if __name__ == "__main__":
 
         for a in lists:
             sort(a, up)
+
+    for key, value in results.items():
+        print(f'{key}  -  {round(sum(value) / 3, 4)}  -  {value}')
+
