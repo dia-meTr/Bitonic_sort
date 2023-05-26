@@ -33,5 +33,5 @@ def rand_apartment(n):
 
 
 if __name__ == "__main__":
-    write_info(rand_float, "data_float.txt")
-    # write_info(rand_int, "data_int.txt")
+    # write_info(rand_float, "data_float.txt")
+    write_info(rand_int, "data.txt")

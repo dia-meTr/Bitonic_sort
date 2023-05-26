@@ -25,4 +25,3 @@ class Result:
     def get_info(self, sequential_speed):
         self.count_speed_up(sequential_speed)
         return [self.elements, self.threads, self.task_size, self.count_average_time(), round(self.spead_up, 8)]
-

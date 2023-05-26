@@ -19,7 +19,7 @@ def run_time_calculation(func, results, random_list, is_up, processes=1, m_count
     res = Result(n, processes, m_count)
     results.append(res)
 
-    for _ in range(0, 3):
+    for _ in range(0, 5):
         calculate_time(func, res, random_list, is_up, key, processes, m_count)
 
     print_results(results)

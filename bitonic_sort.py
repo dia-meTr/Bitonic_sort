@@ -1,7 +1,6 @@
-from copy import deepcopy
-
 
 def bitonic_sort(direction, arr, key=lambda x: x, *args):
+
     if len(arr) <= 1:
         return arr
 
@@ -13,6 +12,7 @@ def bitonic_sort(direction, arr, key=lambda x: x, *args):
 
 
 def bitonic_merge(direction, arr, key=lambda x: x):
+
     if len(arr) == 1:
         return arr
     else:
@@ -24,9 +24,13 @@ def bitonic_merge(direction, arr, key=lambda x: x):
 
 
 def bitonic_swap(direction, arr, key):
+
     dist = len(arr) // 2
 
     for i in range(dist):
 
         if (key(arr[i]) > key(arr[i + dist])) == direction:
             arr[i], arr[i + dist] = arr[i + dist], arr[i]
+
+
+
