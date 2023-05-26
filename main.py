@@ -33,10 +33,10 @@ def get_json_data(file_name):
     return random_lists
 
 
-def run_research_parameters(func, random_list, is_up, file_name, key):
+def research_parameters(func, random_list, is_up, file_name, key):
     n = len(random_list)
     results = []
-    processes_counts = [2 ** j for j in range(3, 8)]
+    processes_counts = [2, 4, 6, 8]
     params = [2 ** j for j in range(2, round(log2(8)))]
     print(params)
     for processes_count in processes_counts:
@@ -44,16 +44,13 @@ def run_research_parameters(func, random_list, is_up, file_name, key):
             res = Result(n, processes_count, task_size)
             results.append(res)
             for j in range(3):
-                calculate_time(func, res, random_list, is_up, processes_count, task_size)
+                calculate_time(func, res, random_list, is_up, key, processes_count, task_size)
 
         print_results(results)
 
     res = Result(n)
     calculate_time(bitonic_sort, res, random_list, is_up, key)
-    res_to_csv(results, file_name, res.count_average_time())
-    for el in results:
-        el.count_speed_up(res.count_average_time())
-        el.print_res2()
+    res_to_csv(results, file_name, random_list, is_up, key)
 
 
 def res_to_csv(results, file_name, random_list, is_up, key):
@@ -63,7 +60,9 @@ def res_to_csv(results, file_name, random_list, is_up, key):
 
     with open(file_name, 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(results[-1].get_info(seq_time))
+        for r in results:
+            writer.writerow(r.get_info(seq_time))
+        writer.writerow(res[0].get_info(seq_time))
 
 
 def key_base(x):
@@ -85,7 +84,7 @@ def key_rate(x):
 def apartment_sorting():
     # TEST APARTMENT SORTING
     # check_correction(bitonic_sort, lists, lambda x: x.price)
-    for i in range(16, 24):
+    for i in range(20, 24):
         rand_list = rand_apartment(2 ** i)
         # check_correction(parallel_sort, [rand_list], key_price, 8, 8)
         run_time_calculation(parallel_sort, results, rand_list, 1, 8, 8, key_price)
@@ -95,34 +94,26 @@ def apartment_sorting():
 def sort_test():
     # TEST SORTING
     lists = get_data('data_float.txt', float)
-    # check_correction(bitonic_sort, lists, lambda x: x.price)
-    for rand_list in lists:
+    for rand_list in lists[5:]:
+        print(len(rand_list))
+        # check_correction(bitonic_sort, lists, lambda x: x)
         # check_correction(parallel_sort, [rand_list], key_price, 8, 8)
         run_time_calculation(parallel_sort, results, rand_list, 1, 8, 8, key=key_base)
         res_to_csv(results, "exp_apartment", rand_list, 1, key=key_base)
 
 
+def run_research():
+    pass
+
+
 if __name__ == "__main__":
     results = []
-    sort_test()
-    # apartment_sorting()
-    # Get random lists
-    # lists = get_data('data_int.txt', int)
-    # lists = get_data('data_float.txt', float)
 
-    #    for j in range(0, 8):
-    #        run_research_parameters(parallel_sort, lists[j], 1, f'exp{j}.csv')
+    l = [6, 3, 8, 4, 1, 2, 5, 7]
+    research_parameters(parallel_sort, l, 1, f'test1.csv', key_base)
 
-    # run_time_calculation(parallel_sort, lists, 1, 8, 8)
+    #lists = get_data('data.txt', float)
+    #for l in lists:
+    #    research_parameters(parallel_sort, l, 1, f'exp6cores.csv', key_base)
 
-    # print("\n\nCheckin Parallel algo with 8 processes\n")
-    # check_correction(parallel_sort, lists, 8, 1)
-    # print("\n\nCheckin Parallel algo with 32 processes\n")
-    # check_correction(parallel_sort, lists, 32, 1)
-
-    # run_time_calculation(bitonic_sort, lists, 1)
-    # check_correction(bitonic_sort, lists)
-
-    # TEST APARTMENT SORTING
-    # check_correction(bitonic_sort, lists, lambda x: x.price)
 

@@ -4,15 +4,15 @@ from bitonic_sort import bitonic_merge, bitonic_sort
 from math import log2
 
 
-def get_args(array, n, m, is_up, comp_func):
+def get_args(array, n, m, is_up, key):
     args = []
     j = 0
 
     while j < n:
         if (j / m) % 2 == 0:
-            args.append((is_up, array[j:j + m], comp_func))
+            args.append((is_up, array[j:j + m], key))
         else:
-            args.append((not is_up, array[j:j + m], comp_func))
+            args.append((not is_up, array[j:j + m], key))
         j = j + m
 
     return args
